@@ -3,15 +3,17 @@
  */
 
 //================================================
-// Variables
-def mod_version = '0.1.0'
-def mc_ver = '1.8'
-def forge_ver = '11.14.1.1402'
-
-//================================================
 // Pre-execute
 
 buildscript {
+    ext {
+        // ==[ Variables ]========================
+        mc_ver = '1.8'
+        forge_ver = '11.14.1.1402'
+        kotlin_ver = '0.11.91.1'
+        mod_version = kotlin_ver
+        // =======================================
+    }
     repositories {
         mavenCentral()
         maven {
@@ -26,7 +28,7 @@ buildscript {
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.11.91.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_ver}"
     }
 }
 
@@ -45,11 +47,23 @@ repositories {
 apply plugin: 'kotlin'
 apply plugin: 'forge'
 
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+dependencies {
+    shade "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_ver}"
+    shade "org.jetbrains.kotlin:kotlin-reflect:${kotlin_ver}"
+}
+
 // Setup Forge plugin
 minecraft {
     version = mc_ver + "-" + forge_ver
     runDir = 'run'
     replace '@VERSION@', mod_version
+
+    // Note: Despite shading Kotlin, we _don't_ repackage it - this lets other mods use it, and saves us downloading libraries at runtime (ewh)
 }
 
 //================================================
@@ -131,8 +145,15 @@ processResources {
 //================================================
 // Jar tasks
 
-// Merge Jenkins and Git manifests to form final manifest in final release jar
 jar {
+    // Shading
+    configurations.shade.each { dep ->
+        from(project.zipTree(dep)){
+            exclude 'META-INF', 'META-INF/**'
+        }
+    }
+
+    // Merge Jenkins and Git manifests to form final manifest in final release jar
     manifest {
         from jenkinsManifest, gitManifest, verManifest
     }
