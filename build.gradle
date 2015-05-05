@@ -11,7 +11,7 @@ buildscript {
         mc_ver = '1.8'
         forge_ver = '11.14.1.1402'
         kotlin_ver = '0.11.91.1'
-        mod_version = kotlin_ver
+        mod_version = '0.1.0'
         // =======================================
     }
     repositories {
@@ -62,6 +62,7 @@ minecraft {
     version = mc_ver + "-" + forge_ver
     runDir = 'run'
     replace '@VERSION@', mod_version
+    replace '@KOTLIN@', kotlin_ver
 
     // Note: Despite shading Kotlin, we _don't_ repackage it - this lets other mods use it, and saves us downloading libraries at runtime (ewh)
 }
@@ -72,7 +73,7 @@ minecraft {
 // Grab system env
 def env = System.getenv()
 
-version = mc_ver + "-" + mod_version
+version = "${mc_ver}-${mod_version}-${kotlin_ver}"
 
 def in_jenkins = false
 // Get Jenkins metadata
@@ -122,18 +123,19 @@ def gitManifest = manifest {
 }
 
 def verManifest = manifest {
-    attributes("Mod-Version": version, "Forge-Version": mc_ver + "-" + forge_ver)
+    attributes("Mod-Version": mod_version, "Forge-Version": mc_ver + "-" + forge_ver, "Kotlin-Version": kotlin_ver)
 }
 
 processResources {
     // Make sure this gets re-executed on updates.
     inputs.property "version", version
     inputs.property "MCversion", mc_ver
+    inputs.property "kotlinver", kotlin_ver
     
     // Process mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         include '**/*.info'
-        expand 'version':mod_version,'MCversion':mc_ver
+        expand 'version':mod_version,'MCversion':mc_ver,'kotlinver':kotlin_ver
     }
 
     // Copy anything else directly
