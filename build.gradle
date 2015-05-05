@@ -80,6 +80,7 @@ def droneManifest = manifest {
     if (env.DRONE != null) {
         attributes("Drone-Build": "true", "Drone-Build-ID": env.DRONE_BUILD_NUMBER, "Drone-Commit": env.DRONE_COMMIT,
                    "Drone-Branch": env.DRONE_BRANCH, "Drone-Repo-Slug": env.DRONE_REPO_SLUG)
+        version += "-d${env.DRONE_BUILD_NUMBER}"
     } else {
         attributes("Drone-Build": "false")
     }

@@ -1,6 +1,8 @@
 # Forgelin
 _Kotlin support for Minecraft Forge 1.8-11.14.1.1371 or above_
 
+[![Build Status](https://drone.io/github.com/Emberwalker/Forgelin/status.png)](https://drone.io/github.com/Emberwalker/Forgelin/latest)
+
 ## End user installation
 1. Get Forgelin jar.
 2. Put jar in `mods` folder.
