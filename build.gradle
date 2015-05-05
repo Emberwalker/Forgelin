@@ -1,0 +1,139 @@
+/*
+ * Forgelin build file.
+ */
+
+//================================================
+// Variables
+def mod_version = '0.1.0'
+def mc_ver = '1.8'
+def forge_ver = '11.14.1.1402'
+
+//================================================
+// Pre-execute
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'Forge'
+            url = 'http://files.minecraftforge.net/maven'
+        }
+        // Sonatype (for SpecialSource in 1.7+)
+        maven {
+            name = "Sonatype Nexus"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.11.91.1'
+    }
+}
+
+repositories {
+    maven {
+        name 'Forge'
+        url 'http://files.minecraftforge.net/maven'
+    }
+    mavenCentral()
+    maven {
+        name 'MinecraftS3'
+        url 'http://s3.amazonaws.com/Minecraft.Download/libraries'
+    }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'forge'
+
+// Setup Forge plugin
+minecraft {
+    version = mc_ver + "-" + forge_ver
+    runDir = 'run'
+    replace '@VERSION@', mod_version
+}
+
+//================================================
+// Jar data
+
+// Grab system env
+def env = System.getenv()
+
+version = mc_ver + "-" + mod_version
+
+def in_jenkins = false
+// Get Jenkins metadata
+def jenkinsManifest = manifest {
+    if (env.BUILD_TAG != null) { // If this works, we'll assume we're in Jenkins atleast.
+        attributes("Jenkins-Build": "true", "Jenkins-Tag": env.BUILD_TAG, "Jenkins-ID": env.BUILD_ID)
+        in_jenkins = true
+    } else {
+        attributes("Jenkins-Build": "false")
+    }
+}
+
+def branch = null
+def hash = null
+def proc1 = "git rev-parse --short HEAD".execute()
+proc1.in.eachLine { line -> hash = line }
+proc1.err.eachLine { line -> println line }
+proc1.waitFor()
+
+
+if (!in_jenkins) {
+    def proc2 = "git rev-parse --abbrev-ref HEAD".execute()
+    proc2.in.eachLine { line -> branch = line }
+    proc2.err.eachLine { line -> println line }
+    proc2.waitFor()
+} else { // In Jenkins
+    branch = env.GIT_BRANCH.minus("origin/")
+}
+
+// If not on master, add branch to jar name
+if (branch != null && !branch.equals("master")) {
+    version += "-" + branch
+} else {
+    version += "-" + hash
+}
+
+// Version tag for jar file name
+if (env.BUILD_NUMBER != null) {
+    version += "-" + env.BUILD_NUMBER
+}
+
+// Get Git metadata (if in Jenkins)
+def gitManifest = manifest {
+    if (env.GIT_BRANCH != null) {
+        attributes("Git-Branch": branch, "Git-Hash": hash)
+    }
+}
+
+def verManifest = manifest {
+    attributes("Mod-Version": version, "Forge-Version": mc_ver + "-" + forge_ver)
+}
+
+processResources {
+    // Make sure this gets re-executed on updates.
+    inputs.property "version", version
+    inputs.property "MCversion", mc_ver
+    
+    // Process mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.info'
+        expand 'version':mod_version,'MCversion':mc_ver
+    }
+
+    // Copy anything else directly
+    from(sourceSets.main.resources.srcDirs) {
+        exclude '**/*.info'
+    }
+}
+
+//================================================
+// Jar tasks
+
+// Merge Jenkins and Git manifests to form final manifest in final release jar
+jar {
+    manifest {
+        from jenkinsManifest, gitManifest, verManifest
+    }
+}
