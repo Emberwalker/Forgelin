@@ -1,0 +1,19 @@
+[
+  {
+    "modid": "Forgelin",
+    "name": "Kotlin for Forge",
+    "description": "Kotlin language adapter and library for Minecraft Forge. (Kotlin ${kotlinver})",
+    "version": "${version}",
+    "mcversion": "${MCversion}",
+    "url": "",
+    "updateUrl": "",
+    "authors": [
+      "Arkan Emberwalker"
+    ],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "parent":"",
+    "dependencies": []
+  }
+]
