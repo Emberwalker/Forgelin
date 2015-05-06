@@ -10,6 +10,7 @@
 .gradle/
 /build/
 !/gradle/**/*
+/logs/
 
 # Eclipse
 .classpath

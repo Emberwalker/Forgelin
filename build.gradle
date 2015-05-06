@@ -55,6 +55,7 @@ configurations {
 dependencies {
     shade "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_ver}"
     shade "org.jetbrains.kotlin:kotlin-reflect:${kotlin_ver}"
+    testCompile "junit:junit:4.+"
 }
 
 // Setup Forge plugin

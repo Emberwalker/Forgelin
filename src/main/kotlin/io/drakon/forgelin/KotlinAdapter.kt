@@ -32,7 +32,6 @@ public class KotlinAdapter : ILanguageAdapter {
     }
 
     override fun setProxy(target: Field, proxyTarget: Class<*>, proxy: Any) {
-        log.trace("setProxy :: target: $target, proxyTarget: $proxyTarget, proxy: $proxy")
         log.debug("Setting proxy: {}.{} -> {}", target.getDeclaringClass().getSimpleName(), target.getName(), proxy)
         if (proxyTarget.getFields().any { x -> x.getName().equals("INSTANCE$") }) {
             // Singleton
@@ -51,8 +50,7 @@ public class KotlinAdapter : ILanguageAdapter {
         }
     }
 
-    override fun getNewInstance(container: FMLModContainer, objectClass: Class<*>, classLoader: ClassLoader, factoryMarkedAnnotation: Method?): Any? {
-        log.trace("getNewInstance :: container: $container, objectClass: $objectClass, classLoader: $classLoader, factoryMarkedAnnotation: $factoryMarkedAnnotation")
+    override fun getNewInstance(container: FMLModContainer?, objectClass: Class<*>, classLoader: ClassLoader, factoryMarkedAnnotation: Method?): Any? {
         log.debug("FML has asked for {} to be constructed...", objectClass.getSimpleName())
         try {
             // Try looking for an object type
@@ -76,8 +74,7 @@ public class KotlinAdapter : ILanguageAdapter {
         }
     }
 
-    override fun setInternalProxies(mod: ModContainer, side: Side, loader: ClassLoader) {
-        log.trace("setInternalProxies :: mod: $mod, side: $side, loader: $loader")
+    override fun setInternalProxies(mod: ModContainer?, side: Side?, loader: ClassLoader?) {
         // Nothing to do; FML's got this covered for Kotlin.
     }
 
