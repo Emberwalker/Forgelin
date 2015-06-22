@@ -4,13 +4,13 @@ import io.drakon.forgelin.KotlinAdapter
 import io.drakon.forgelin.tests.dummy.Proxy
 import io.drakon.forgelin.tests.dummy.ProxyClient
 import io.drakon.forgelin.tests.dummy.ProxyServer
-
 import net.minecraftforge.fml.common.SidedProxy
-
+import kotlin.platform.platformStatic
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import org.junit.After as post
 import org.junit.Before as pre
 import org.junit.Test as test
-import org.junit.After as post
-import kotlin.test.*
 
 public class AdapterTest {
 
@@ -40,7 +40,17 @@ public class AdapterTest {
         assert(TestObject.proxy is ProxyServer)
     }
 
-    //test fun testSetProxyClass() {} // TODO: Implement this test when setProxy can work with classes.
+    test fun testSetProxyClass() {
+        // For whatever reason calling 'javaClass' gets us the internal companion class, instead of the class itself
+        val clazz = javaClass<TestClass>()
+        val f = clazz.getField("proxy")
+
+        adapter.setProxy(f, clazz, ProxyClient())
+        assert(TestClass.proxy is ProxyClient)
+
+        adapter.setProxy(f, clazz, ProxyServer())
+        assert(TestClass.proxy is ProxyServer)
+    }
 
     post fun teardown() {}
 
@@ -49,6 +59,10 @@ public class AdapterTest {
         public var proxy: Proxy? = null
     }
 
-    public class TestClass {}
-
+    public class TestClass {
+        companion object {
+            SidedProxy(clientSide = "io.drakon.forgelin.tests.dummy.ProxyClient", serverSide = "io.drakon.forgelin.tests.dummy.ProxyServer")
+            public platformStatic var proxy: Proxy? = null
+        }
+    }
 }

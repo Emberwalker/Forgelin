@@ -43,10 +43,8 @@ public class KotlinAdapter : ILanguageAdapter {
                 throw KotlinAdapterException(ex)
             }
         } else {
-            // Class (broken)
-            // TODO: Fix me, somehow?
-            log.fatal("SidedProxy isn't supported for class-style Kotlin mods. Use object instead! Dying to be safe.")
-            throw UnsupportedOperationException("SidedProxy isn't supported for class-style Kotlin mods. Use object instead!")
+            //TODO Log?
+            target.set(proxyTarget, proxy)
         }
     }
 
