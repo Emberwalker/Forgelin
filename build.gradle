@@ -89,7 +89,12 @@ def droneManifest = manifest {
 
 // Version manifest
 def verManifest = manifest {
-    attributes("Mod-Version": mod_version, "Forge-Version": mc_ver + "-" + forge_ver, "Kotlin-Version": kotlin_ver, "FMLCorePlugin": "io.drakon.forgelin.CorePlugin", "FMLCorePluginContainsFMLMod": "true")
+    attributes("Mod-Version": mod_version, "Forge-Version": mc_ver + "-" + forge_ver, "Kotlin-Version": kotlin_ver)
+}
+
+// FML Core manifest
+def fmlManifest = manifest {
+	attributes("FMLCorePlugin": "io.drakon.forgelin.CorePlugin", "FMLCorePluginContainsFMLMod": "true")
 }
 
 processResources {
@@ -123,6 +128,6 @@ jar {
 
     // Merge Jenkins and Git manifests to form final manifest in final release jar
     manifest {
-        from droneManifest, verManifest
+        from droneManifest, verManifest, fmlManifest
     }
 }
