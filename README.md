@@ -10,7 +10,7 @@ _Kotlin support for Minecraft Forge 1.8-11.14.1.1371 or above_
 4. Punch wood.
 
 ## Using Forgelin
-There are two options for deploying Forgeline for use in your mod - installing Forgelin as a mod dependancy, or repackaging it.
+There are two options for deploying Forgelin for use in your mod - installing Forgelin as a mod dependancy, or repackaging it.
 
 ### Required for both
 Both these methods assume you have the Kotlin and Forge plugins enabled in `build.gradle`:
@@ -34,6 +34,9 @@ This takes the least space on user systems, as it's shared between all mods usin
 present. Simply compile against the Forgelin jar in place of the Kotlin stdlib/reflect jars, and require users to install Forgelin
 in the mods folder like any other mod. There's a placeholder mod in the project you can use for dependency and version checking (the
 mod ID is 'Forgelin').
+
+Forgelin is available from the [Tethys Maven server](https://tethys.drakon.io/) - you can add that to the `repositories` block of
+your buildscript.
 
 Once you've set up the dependancy, all you need to do is set `modLanguageAdapter = "io.drakon.forgelin.KotlinAdapter"` in your Mod
 annotation. No, really, that's it. Not even setting `modLanguage`! (unless you want to, it won't break anything =P)
