@@ -11,7 +11,7 @@ buildscript {
         mc_ver = '1.8'
         forge_ver = '11.14.1.1402'
         kotlin_ver = '1.0.0-beta-3595'
-        mod_version = '0.1.0'
+        mod_version = '0.1.1'
         // =======================================
     }
     repositories {

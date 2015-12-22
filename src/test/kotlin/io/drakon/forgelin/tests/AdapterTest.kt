@@ -5,7 +5,7 @@ import io.drakon.forgelin.tests.dummy.Proxy
 import io.drakon.forgelin.tests.dummy.ProxyClient
 import io.drakon.forgelin.tests.dummy.ProxyServer
 import net.minecraftforge.fml.common.SidedProxy
-import kotlin.platform.platformStatic
+import kotlin.jvm.JvmStatic
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.junit.After as post
@@ -16,21 +16,21 @@ public class AdapterTest {
 
     val adapter: KotlinAdapter = KotlinAdapter()
 
-    pre fun setup() {}
+    @pre fun setup() {}
 
-    test fun testNewInstanceObject() {
+    @test fun testNewInstanceObject() {
         val inst = adapter.getNewInstance(null, TestObject.javaClass, ClassLoader.getSystemClassLoader(), null)
         assertEquals(inst, TestObject)
     }
 
-    test fun testNewInstanceClass() {
+    @test fun testNewInstanceClass() {
         val inst = adapter.getNewInstance(null, javaClass<TestClass>(), ClassLoader.getSystemClassLoader(), null)
         assertTrue(inst is TestClass)
     }
 
-    test fun testSetInternalProxies() {} // NOOP
+    @test fun testSetInternalProxies() {} // NOOP
 
-    test fun testSetProxyObject() {
+    @test fun testSetProxyObject() {
         val f = TestObject.javaClass.getField("proxy")
 
         adapter.setProxy(f, TestObject.javaClass, ProxyClient())
@@ -40,7 +40,7 @@ public class AdapterTest {
         assert(TestObject.proxy is ProxyServer)
     }
 
-    test fun testSetProxyClass() {
+    @test fun testSetProxyClass() {
         // For whatever reason calling 'javaClass' gets us the internal companion class, instead of the class itself
         val clazz = javaClass<TestClass>()
         val f = clazz.getField("proxy")
@@ -52,17 +52,18 @@ public class AdapterTest {
         assert(TestClass.proxy is ProxyServer)
     }
 
-    post fun teardown() {}
+    @post fun teardown() {}
 
     public object TestObject {
-        SidedProxy(clientSide = "io.drakon.forgelin.tests.dummy.ProxyClient", serverSide = "io.drakon.forgelin.tests.dummy.ProxyServer")
+        @SidedProxy(clientSide = "io.drakon.forgelin.tests.dummy.ProxyClient", serverSide = "io.drakon.forgelin.tests.dummy.ProxyServer")
         public var proxy: Proxy? = null
     }
 
     public class TestClass {
         companion object {
-            SidedProxy(clientSide = "io.drakon.forgelin.tests.dummy.ProxyClient", serverSide = "io.drakon.forgelin.tests.dummy.ProxyServer")
-            public platformStatic var proxy: Proxy? = null
+            @JvmStatic
+            @SidedProxy(clientSide = "io.drakon.forgelin.tests.dummy.ProxyClient", serverSide = "io.drakon.forgelin.tests.dummy.ProxyServer")
+            public var proxy: Proxy? = null
         }
     }
 }
