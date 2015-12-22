@@ -74,6 +74,8 @@ minecraft {
 // Grab system env
 def env = System.getenv()
 
+group = "io.drakon"
+archivesBaseName = "forgelin"
 version = "${mc_ver}-${mod_version}-${kotlin_ver}"
 
 // Drone manifest
