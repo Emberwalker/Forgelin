@@ -6,8 +6,6 @@ import io.drakon.forgelin.tests.dummy.ProxyClient
 import io.drakon.forgelin.tests.dummy.ProxyServer
 import net.minecraftforge.fml.common.SidedProxy
 import kotlin.jvm.JvmStatic
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import org.junit.After as post
 import org.junit.Before as pre
 import org.junit.Test as test
@@ -20,12 +18,12 @@ public class AdapterTest {
 
     @test fun testNewInstanceObject() {
         val inst = adapter.getNewInstance(null, TestObject.javaClass, ClassLoader.getSystemClassLoader(), null)
-        assertEquals(inst, TestObject)
+        assert(inst == TestObject)
     }
 
     @test fun testNewInstanceClass() {
         val inst = adapter.getNewInstance(null, javaClass<TestClass>(), ClassLoader.getSystemClassLoader(), null)
-        assertTrue(inst is TestClass)
+        assert(inst is TestClass)
     }
 
     @test fun testSetInternalProxies() {} // NOOP

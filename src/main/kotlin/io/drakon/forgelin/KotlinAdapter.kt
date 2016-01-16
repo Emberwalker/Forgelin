@@ -1,15 +1,12 @@
 package io.drakon.forgelin
 
 import net.minecraftforge.fml.common.*
-import net.minecraftforge.fml.common.Mod.EventHandler
 import net.minecraftforge.fml.relauncher.Side
 import org.apache.logging.log4j.LogManager
 
 import java.lang.reflect.Field
 import java.lang.reflect.Method
-import java.util.Locale
-import kotlin.reflect.KClass
-import kotlin.reflect.jvm.kotlin
+import kotlin.collections.any
 
 /**
  * Kotlin implementation of FML's ILanguageAdapter.
@@ -53,16 +50,14 @@ public class KotlinAdapter : ILanguageAdapter {
         try {
             // Try looking for an object type
             val f = objectClass.getField("INSTANCE$")
-            val obj = f.get(null)
-            if (obj == null) throw NullPointerException()
+            val obj = f.get(null) ?: throw NullPointerException()
             log.debug("Found an object INSTANCE$ reference in {}, using that. ({})", objectClass.getSimpleName(), obj)
             return obj
         } catch (ex: Exception) {
             // Try looking for a class type
             log.debug("Failed to get object reference, trying class construction.")
             try {
-                val obj = objectClass.newInstance()
-                if (obj == null) throw NullPointerException()
+                val obj = objectClass.newInstance() ?: throw NullPointerException()
                 log.debug("Constructed an object from a class type ({}), using that. ({})", objectClass, obj)
                 log.warn("Hey, you, modder who owns {} - you should be using 'object' instead of 'class' on your @Mod class.", objectClass.getSimpleName())
                 return obj

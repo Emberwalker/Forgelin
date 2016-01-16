@@ -1,6 +1,5 @@
 package io.drakon.forgelin
 
-import org.apache.logging.log4j.LogManager
 import net.minecraftforge.fml.common.Mod as mod
 
 /**
@@ -8,5 +7,5 @@ import net.minecraftforge.fml.common.Mod as mod
  *
  * @author Arkan <arkan@drakon.io>
  */
-@mod(modid = "Forgelin", name = "Kotlin for Forge", version = "@VERSION@-@KOTLIN@", modLanguageAdapter = "io.drakon.forgelin.KotlinAdapter", acceptableRemoteVersions = "*")
+@mod(modid = "Forgelin", name = "Kotlin for Forge", version = "@VERSION@-@KOTLIN@", modLanguage = "kotlin", modLanguageAdapter = "io.drakon.forgelin.KotlinAdapter", acceptableRemoteVersions = "*")
 public object Forgelin {}
