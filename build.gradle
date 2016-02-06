@@ -10,8 +10,8 @@ buildscript {
         // ==[ Variables ]========================
         mc_ver = '1.8.9'
         forge_ver = '11.15.0.1699'
-        kotlin_ver = '1.0.0-beta-4584'
-        mod_version = '1.0.0'
+        kotlin_ver = '1.0.0-rc-1036'
+        mod_version = '1.1.0'
         // =======================================
     }
     repositories {

@@ -30,11 +30,11 @@ public class KotlinAdapter : ILanguageAdapter {
 
     override fun setProxy(target: Field, proxyTarget: Class<*>, proxy: Any) {
         log.debug("Setting proxy: {}.{} -> {}", target.getDeclaringClass().getSimpleName(), target.getName(), proxy)
-        if (proxyTarget.getFields().any { x -> x.getName().equals("INSTANCE$") }) {
+        if (proxyTarget.getFields().any { x -> x.getName().equals("INSTANCE") }) {
             // Singleton
             try {
-                log.debug("Setting proxy on INSTANCE$; singleton target.")
-                val obj = proxyTarget.getField("INSTANCE$").get(null)
+                log.debug("Setting proxy on INSTANCE; singleton target.")
+                val obj = proxyTarget.getField("INSTANCE").get(null)
                 target.set(obj, proxy)
             } catch (ex: Exception) {
                 throw KotlinAdapterException(ex)
