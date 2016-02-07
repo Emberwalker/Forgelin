@@ -21,6 +21,15 @@ buildscript {
 	[...]
 }
 
+repositories {
+	[...]
+	// For Kotlin lang adapter
+	maven {
+		name 'Tethys'
+		url 'http://tethys.drakon.io/maven'
+	}
+}
+
 apply plugin: 'kotlin'
 apply plugin: 'net.minecraftforge.gradle.forge'
 [...]
