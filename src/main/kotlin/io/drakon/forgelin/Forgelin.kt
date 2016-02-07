@@ -8,4 +8,4 @@ import net.minecraftforge.fml.common.Mod as mod
  * @author Arkan <arkan@drakon.io>
  */
 @mod(modid = "Forgelin", name = "Kotlin for Forge", version = "@VERSION@-@KOTLIN@", modLanguage = "kotlin", modLanguageAdapter = "io.drakon.forgelin.KotlinAdapter", acceptableRemoteVersions = "*")
-public object Forgelin {}
+object Forgelin {}
