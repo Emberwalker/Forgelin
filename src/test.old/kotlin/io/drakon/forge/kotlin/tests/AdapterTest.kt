@@ -1,9 +1,9 @@
-package io.drakon.forgelin.tests
+package io.drakon.forge.kotlin.tests
 
-import io.drakon.forgelin.KotlinAdapter
-import io.drakon.forgelin.tests.dummy.Proxy
-import io.drakon.forgelin.tests.dummy.ProxyClient
-import io.drakon.forgelin.tests.dummy.ProxyServer
+import io.drakon.forge.kotlin.KotlinAdapter
+import io.drakon.forge.kotlin.tests.dummy.Proxy
+import io.drakon.forge.kotlin.tests.dummy.ProxyClient
+import io.drakon.forge.kotlin.tests.dummy.ProxyServer
 import net.minecraftforge.fml.common.SidedProxy
 import kotlin.jvm.JvmStatic
 import org.junit.After as post
@@ -53,14 +53,14 @@ public class AdapterTest {
     @post fun teardown() {}
 
     public object TestObject {
-        @SidedProxy(clientSide = "io.drakon.forgelin.tests.dummy.ProxyClient", serverSide = "io.drakon.forgelin.tests.dummy.ProxyServer")
+        @SidedProxy(clientSide = "ProxyClient", serverSide = "ProxyServer")
         public var proxy: Proxy? = null
     }
 
     public class TestClass {
         companion object {
             @JvmStatic
-            @SidedProxy(clientSide = "io.drakon.forgelin.tests.dummy.ProxyClient", serverSide = "io.drakon.forgelin.tests.dummy.ProxyServer")
+            @SidedProxy(clientSide = "ProxyClient", serverSide = "ProxyServer")
             public var proxy: Proxy? = null
         }
     }

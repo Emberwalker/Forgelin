@@ -1,72 +1,37 @@
 /*
- * Forgelin build file.
+ * Forge Kotlin Adapter build file.
  */
 
 //================================================
 // Pre-execute
 
 buildscript {
-    ext {
-        // ==[ Variables ]========================
-        mc_ver = '1.8.9'
-        forge_ver = '11.15.0.1699'
-        kotlin_ver = '1.0.0-rc-1036'
-        mod_version = '1.1.0'
-        // =======================================
-    }
-    repositories {
-        mavenCentral()
-        maven {
-            name = 'Forge'
-            url = 'http://files.minecraftforge.net/maven'
-        }
-        // Sonatype (for SpecialSource in 1.7+)
-        maven {
-            name = "Sonatype Nexus"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlin_ver}"
-    }
+  ext.kotlin_version = '1.0.0-rc-1036'
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VER"
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN_VER"
+  }
 }
 
 repositories {
-    maven {
-        name 'Forge'
-        url 'http://files.minecraftforge.net/maven'
-    }
-    mavenCentral()
-    maven {
-        name 'MinecraftS3'
-        url 'http://s3.amazonaws.com/Minecraft.Download/libraries'
-    }
+  maven {
+    name 'Forge'
+    url 'http://files.minecraftforge.net/maven'
+  }
+  mavenCentral()
 }
 
 apply plugin: 'kotlin'
-apply plugin: 'net.minecraftforge.gradle.forge'
-
-configurations {
-    shade
-    compile.extendsFrom shade
-}
+apply plugin: 'idea'
 
 dependencies {
-    shade "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_ver}"
-    shade "org.jetbrains.kotlin:kotlin-reflect:${kotlin_ver}"
-    testCompile "junit:junit:4.+"
-}
-
-// Setup Forge plugin
-minecraft {
-    version = mc_ver + "-" + forge_ver
-    runDir = 'run'
-    mappings = 'snapshot_20160116'
-    replace '@VERSION@', mod_version
-    replace '@KOTLIN@', kotlin_ver
-
-    // Note: Despite shading Kotlin, we _don't_ repackage it - this lets other mods use it, and saves us downloading libraries at runtime (ewh)
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VER"
+  compile "net.minecraftforge:forge:$MC_VER-$FORGE_VER:universal"
+  compile "org.apache.logging.log4j:log4j-api:$L4J2_VER"
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$KOTLIN_VER"
 }
 
 //================================================
@@ -75,59 +40,34 @@ minecraft {
 // Grab system env
 def env = System.getenv()
 
-group = "io.drakon"
-archivesBaseName = "forgelin"
-version = "${mc_ver}-${mod_version}-${kotlin_ver}"
+  group = "io.drakon.forge"
+  archivesBaseName = "kotlin-adapter"
+  version = "$KOTLIN_VER+$MC_VER"
 
-// Drone manifest
-def droneManifest = manifest {
+  // Drone manifest
+  def droneManifest = manifest {
     if (env.DRONE != null) {
-        attributes("Drone-Build": "true", "Drone-Build-ID": env.DRONE_BUILD_NUMBER, "Drone-Commit": env.DRONE_COMMIT,
-                   "Drone-Branch": env.DRONE_BRANCH, "Drone-Repo-Slug": env.DRONE_REPO_SLUG)
-        version += "-d${env.DRONE_BUILD_NUMBER}"
+      attributes("Drone-Build": "true", "Drone-Build-ID": env.DRONE_BUILD_NUMBER, "Drone-Commit": env.DRONE_COMMIT,
+          "Drone-Branch": env.DRONE_BRANCH, "Drone-Repo-Slug": env.DRONE_REPO_SLUG)
+      version += "-d${env.DRONE_BUILD_NUMBER}"
     } else {
-        attributes("Drone-Build": "false")
+      attributes("Drone-Build": "false")
     }
-}
+  }
 
 // Version manifest
 def verManifest = manifest {
-    attributes("Mod-Version": mod_version, "Forge-Version": mc_ver + "-" + forge_ver, "Kotlin-Version": kotlin_ver)
-}
-
-processResources {
-    // Make sure this gets re-executed on updates.
-    inputs.property "version", version
-    inputs.property "MCversion", mc_ver
-    inputs.property "kotlinver", kotlin_ver
-    
-    // Process mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        include '**/*.info'
-        expand 'version':mod_version,'MCversion':mc_ver,'kotlinver':kotlin_ver
-    }
-
-    // Copy anything else directly
-    from(sourceSets.main.resources.srcDirs) {
-        exclude '**/*.info'
-    }
+  attributes("Forge-Version": MC_VER + "-" + FORGE_VER, "Kotlin-Version": KOTLIN_VER)
 }
 
 //================================================
 // Jar tasks
 
 jar {
-    // Shading
-    configurations.shade.each { dep ->
-        from(project.zipTree(dep)){
-            exclude 'META-INF', 'META-INF/**'
-        }
-    }
-
-    // Merge Jenkins and Git manifests to form final manifest in final release jar
-    manifest {
-        from droneManifest, verManifest
-    }
+  // Merge Jenkins and Git manifests to form final manifest in final release jar
+  manifest {
+    from droneManifest, verManifest
+  }
 }
 
 
@@ -136,15 +76,18 @@ jar {
 apply plugin: 'maven'
 
 if (!project.hasProperty("DEPLOY_DIR")) {
-    ext.DEPLOY_DIR = null
+  ext.DEPLOY_DIR = null
 }
 
 uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "file://${DEPLOY_DIR}")
-        }
+  repositories {
+    mavenDeployer {
+      repository(url: "file://$DEPLOY_DIR")
     }
+  }
 }
 
 uploadArchives.onlyIf { return DEPLOY_DIR != null }
+sourceSets {
+  main.java.srcDirs += 'src/main/kotlin'
+}

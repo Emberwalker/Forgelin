@@ -1,4 +1,4 @@
-package io.drakon.forgelin.tests.dummy
+package io.drakon.forge.kotlin.tests.dummy
 
 /**
  * Dummy server proxy for tests

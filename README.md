@@ -1,54 +1,38 @@
-# Forgelin
+# Kotlin Adapter for Minecraft Forge
 _Kotlin support for Minecraft Forge 1.8-11.14.1.1371 or above_
 
 [![Build Status](https://drone.io/github.com/Emberwalker/Forgelin/status.png)](https://drone.io/github.com/Emberwalker/Forgelin/latest)
 
-## End user installation
-1. Get Forgelin jar.
-2. Put jar in `mods` folder.
-3. Add mods which use Forgelin.
-4. Punch wood.
+## Using the Adapter
+The basic workflow for using the Adapter in your project is;
+1. Either shade (and repack) the adapter jar or manually copy the adapter + helpers you want into your project
+2. Shade (via a Gradle plugin or with ForgeGradle trickery) the version of Kotlin you want
+3. Hack away
 
-## Using Forgelin
-There are two options for deploying Forgelin for use in your mod - installing Forgelin as a mod dependancy, or repackaging it.
-
-### Required for both
-Both these methods assume you have the Kotlin and Forge plugins enabled in `build.gradle`:
+### Buildscript Preparation
+We require the Kotlin and Forge plugins to be enabled in `build.gradle`:
 ```
 buildscript {
 	[...]
 	dependencies {
 		[...]
-		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:0.11.91.1"
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0-rc-1036"
 	}
 	[...]
 }
 
 apply plugin: 'kotlin'
-apply plugin: 'forge'
+apply plugin: 'net.minecraftforge.gradle.forge'
 [...]
 ```
 
-### Mod dependency
-This takes the least space on user systems, as it's shared between all mods using it, so only a single copy of the Kotlin stdlib is
-present. Simply compile against the Forgelin jar in place of the Kotlin stdlib/reflect jars, and require users to install Forgelin
-in the mods folder like any other mod. There's a placeholder mod in the project you can use for dependency and version checking (the
-mod ID is 'Forgelin').
-
-Forgelin is available from the [Tethys Maven server](https://tethys.drakon.io/) - you can add that to the `repositories` block of
-your buildscript.
-
-Once you've set up the dependancy, all you need to do is set `modLanguageAdapter = "io.drakon.forgelin.KotlinAdapter"` in your Mod
-annotation. No, really, that's it. Not even setting `modLanguage`! (unless you want to, it won't break anything =P)
-
 ### Repackaging
-This technique is a little more fiddly, and requires tinkering with your `build.gradle` file. **If you aren't comfortable with
-Gradle shenanigans, use the dependancy option!**
+This technique requires tinkering with your `build.gradle` file.
 
 As a second warning: **Doing this wrong could break other Kotlin-based mods!**
 
-Now the warnings are out the way, we're going to use a technique called shading combined with repacking. Built jars of Forgelin
-use shading themselves, to pack the Kotlin stdlib/reflect jars. Without Forgelin's install, we need to pack our own copies.
+Now the warnings are out the way, we're going to use a technique called shading combined with repacking. Built jars of
+the adapter do not come with Kotlin installations. This means your mod *must* include its own, repackaged version.
 
 First, we need to add a new configuration:
 ```
@@ -58,12 +42,13 @@ configurations {
 }
 ```
 
-Then on the lines where you would normally define `compile` in the main dependencies block for Kotlin, replace `compile` with
-`shade` - below is an example dependency block (for Kotlin 0.11.91.1).
+Then on the lines where you would normally define `compile` in the main dependencies block for Kotlin, replace `compile`
+with `shade` - below is an example dependency block (for Kotlin 1.0.0-rc-1036.) If you need the kotlin-reflect library,
+add that in the same way (but be aware this'll add >1MB to your jar size!)
 ```
 dependencies {
-	shade 'org.jetbrains.kotlin:kotlin-stdlib:0.11.91.1'
-	shade 'org.jetbrains.kotlin:kotlin-reflect:0.11.91.1'
+	shade 'org.jetbrains.kotlin:kotlin-stdlib:1.0.0-rc-1036'
+	shade 'io.drakon.forge:kotlin-adapter:1.0.0-rc-1036+1.8.9'
 }
 ```
 
@@ -81,27 +66,26 @@ jar {
 }
 ```
 
-Finally, ask ForgeGradle to add some extra rules for reobfuscation, to avoid namespacing issues with vanilla Forgelin/other
-Kotlin versions on the classpath:
+Finally, ask ForgeGradle to add some extra rules for reobfuscation, to avoid namespace issues with other Kotlin versions
+that may be on the classpath:
 ```
-minecraft {
-	[...]
-	// Kotlin shading
-	srgExtra "PK: kotlin your/package/here/repack/kotlin"
+reobf {
+    jar {
+	    // Kotlin+Adapter shading
+	    extra "PK: kotlin your/package/here/repack/kotlin"
+	    extra "PK: org/jetbrains/annotations your/package/here/repack/annotations"
+	    extra "PK: io/drakon/forge/kotlin your/package/here/repack/adapter"
+	}
 }
 ```
-The destination package (`your/package/here/repack/kotlin` for this example) can be any package you think won't clash, either
-with your code or anybody elses. As in the example, package paths use forward slash (`/`) in `PK` lines.
+The destination package (`your/package/here/repack` for this example) can be any package you think won't clash, either
+with your code or anybody else's packages. As in the example, package paths use forward slash (`/`) in `PK` lines.
 
-After you're done with Gradle, simply copy the `KotlinAdapter` source file (`src/main/kotlin/io/drakon/forgelin/KotlinAdapter.kt`)
-somewhere in your project, changing the package path, then use the new path in the `Mod` annotation.
-
-Your @Mod implementation *must* be an `object`. There is no reason to make it a class and the adapter will not work if you do so.
-
-___If this seems too complicated, just use the mod dependency. It's really easier.___
+Your @Mod implementation *must* be an `object`. There is no reason to make it a class and the adapter will not work if
+you do so.
 
 ## Licenses
-Forgelin is licensed under the MIT License (see `LICENSE`).
+The Kotlin Adapter is licensed under the ISC License (see `LICENSE`), which is just a modernised version of the MIT
+License.
 
-Kotlin is property of Jetbrains. Look at their site for licensing bumf. This only really matters for redistributable jars which contain
-the Kotlin stdlib/reflect classes.
+Kotlin is property of Jetbrains. Look at their site for licensing bumf.

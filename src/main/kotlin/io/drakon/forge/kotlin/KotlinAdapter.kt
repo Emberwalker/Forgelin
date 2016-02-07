@@ -1,19 +1,20 @@
-package io.drakon.forgelin
+package io.drakon.forge.kotlin
 
-import net.minecraftforge.fml.common.*
+import net.minecraftforge.fml.common.ILanguageAdapter
+import net.minecraftforge.fml.common.FMLModContainer
+import net.minecraftforge.fml.common.ModContainer
 import net.minecraftforge.fml.relauncher.Side
 import org.apache.logging.log4j.LogManager
 
 import java.lang.reflect.Field
 import java.lang.reflect.Method
-import kotlin.collections.any
 
 /**
  * Kotlin implementation of FML's ILanguageAdapter.
  *
- * Use by setting <pre>modLanguageAdapter = "io.drakon.forgelin.KotlinAdapter"</pre> in the Mod annotation
- * Your Kotlin @Mod implementation *must* be an `object`
- * (Forge 1.8-11.14.1.1371 or above required).
+ * Use by setting <pre>modLanguageAdapter = "io.drakon.forge.kotlin.KotlinAdapter"</pre> in the Mod annotation.
+ * Your Kotlin @Mod implementation <b>must</b> be an <pre>object</pre> type.
+ * (Forge 1.8-11.14.1.1371 and Kotlin RC1 or above required)
  *
  * @author Arkan <arkan@drakon.io>
  * @author Carrot <git@bunnies.io>
@@ -60,9 +61,9 @@ class KotlinAdapter : ILanguageAdapter {
         val modObject = try {
             instanceField.get(null)
         } catch (exception: IllegalArgumentException) {
-            throw unexpectedInitialiserSignatureException(exception)
+            throw unexpectedInitializerSignatureException(exception)
         } catch (exception: IllegalAccessException) {
-            throw wrongVisibilityOnInitialiserException(exception)
+            throw wrongVisibilityOnInitializerException(exception)
         }
 
         return modObject
@@ -70,9 +71,8 @@ class KotlinAdapter : ILanguageAdapter {
 
     private fun noInstanceFieldException(exception: Exception) = KotlinAdapterException("Couldn't find INSTANCE singleton on Kotlin @Mod container", exception)
     private fun instanceSecurityException(exception: Exception) = KotlinAdapterException("Security violation accessing INSTANCE singleton on Kotlin @Mod container", exception)
-    private fun modObjectFailedToInitialiseException(exception: Exception) = KotlinAdapterException("Failed to initialise Kotlin @Mod object", exception)
-    private fun unexpectedInitialiserSignatureException(exception: Exception) = KotlinAdapterException("Kotlin @Mod object has an unexpected initialiser signature, somehow?", exception)
-    private fun wrongVisibilityOnInitialiserException(exception: Exception) = KotlinAdapterException("Initialiser on Kotlin @Mod object isn't `public`", exception)
+    private fun unexpectedInitializerSignatureException(exception: Exception) = KotlinAdapterException("Kotlin @Mod object has an unexpected initializer signature, somehow?", exception)
+    private fun wrongVisibilityOnInitializerException(exception: Exception) = KotlinAdapterException("Initializer on Kotlin @Mod object isn't `public`", exception)
 
     private class KotlinAdapterException(message: String, exception: Exception): RuntimeException("Kotlin adapter error - do not report to Forge! " + message, exception)
 }

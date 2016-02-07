@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.SidedProxy as proxy
 /**
  * Test mod (class-style)
  */
-mod(modid = "Forgelin-Workbench-Class", name = "Forgelin Debug - Class", modLanguageAdapter = "io.drakon.forgelin.KotlinAdapter")
+mod(modid = "Forgelin-Workbench-Class", name = "Forgelin Debug - Class", modLanguageAdapter = "KotlinAdapter")
 public class ForgelinWorkbenchClass {
 
     private val log = LogManager.getLogger("Workbench/Cls")
