@@ -96,16 +96,9 @@ with your code or anybody elses. As in the example, package paths use forward sl
 After you're done with Gradle, simply copy the `KotlinAdapter` source file (`src/main/kotlin/io/drakon/forgelin/KotlinAdapter.kt`)
 somewhere in your project, changing the package path, then use the new path in the `Mod` annotation.
 
+Your @Mod implementation *must* be an `object`. There is no reason to make it a class and the adapter will not work if you do so.
+
 ___If this seems too complicated, just use the mod dependency. It's really easier.___
-
-## Classes or Objects?
-
-___tl;dr - Use `object`, not `class`. It's better in every way for `@Mod`.___
-
-This question is difficult to answer - for objects/classes outside your main `@Mod` object, use whatever you want. For the `@Mod` though,
-things get a little more awkward. Forgelin is designed mostly to support `object`-style mods, and all the usual FML stuff works
-with them. `class`-style works, but with one major caveat - `@SidedProxy` does **not** work right now due to the lack of statics in
-Kotlin itself. Other stuff also might be broken, bug reports welcome!
 
 ## Licenses
 Forgelin is licensed under the MIT License (see `LICENSE`).

@@ -12,65 +12,67 @@ import kotlin.collections.any
  * Kotlin implementation of FML's ILanguageAdapter.
  *
  * Use by setting <pre>modLanguageAdapter = "io.drakon.forgelin.KotlinAdapter"</pre> in the Mod annotation
+ * Your Kotlin @Mod implementation *must* be an `object`
  * (Forge 1.8-11.14.1.1371 or above required).
  *
  * @author Arkan <arkan@drakon.io>
+ * @author Carrot <git@bunnies.io>
  */
-public class KotlinAdapter : ILanguageAdapter {
+@Suppress("UNUSED")
+class KotlinAdapter : ILanguageAdapter {
 
-    companion object metadata {
-        public final val ADAPTER_VERSION: String = "@VERSION@-@KOTLIN@"
-    }
-
-    private val log = LogManager.getLogger("ILanguageAdapter/Kotlin")
-
-    override fun supportsStatics(): Boolean {
-        return false
-    }
+    private val logger = LogManager.getLogger("ILanguageAdapter/Kotlin")
 
     override fun setProxy(target: Field, proxyTarget: Class<*>, proxy: Any) {
-        log.debug("Setting proxy: {}.{} -> {}", target.getDeclaringClass().getSimpleName(), target.getName(), proxy)
-        if (proxyTarget.getFields().any { x -> x.getName().equals("INSTANCE") }) {
-            // Singleton
-            try {
-                log.debug("Setting proxy on INSTANCE; singleton target.")
-                val obj = proxyTarget.getField("INSTANCE").get(null)
-                target.set(obj, proxy)
-            } catch (ex: Exception) {
-                throw KotlinAdapterException(ex)
-            }
-        } else {
-            //TODO Log?
-            target.set(proxyTarget, proxy)
-        }
+        logger.debug("Setting proxy on target: {}.{} -> {}", target.declaringClass.simpleName, target.name, proxy)
+
+        val instanceField = findInstanceFieldOrThrow(proxyTarget)
+        val modObject = findModObjectOrThrow(instanceField)
+
+        target.set(modObject, proxy)
     }
 
     override fun getNewInstance(container: FMLModContainer?, objectClass: Class<*>, classLoader: ClassLoader, factoryMarkedAnnotation: Method?): Any? {
-        log.debug("FML has asked for {} to be constructed...", objectClass.getSimpleName())
-        try {
-            // Try looking for an object type
-            val f = objectClass.getField("INSTANCE$")
-            val obj = f.get(null) ?: throw NullPointerException()
-            log.debug("Found an object INSTANCE$ reference in {}, using that. ({})", objectClass.getSimpleName(), obj)
-            return obj
-        } catch (ex: Exception) {
-            // Try looking for a class type
-            log.debug("Failed to get object reference, trying class construction.")
-            try {
-                val obj = objectClass.newInstance() ?: throw NullPointerException()
-                log.debug("Constructed an object from a class type ({}), using that. ({})", objectClass, obj)
-                log.warn("Hey, you, modder who owns {} - you should be using 'object' instead of 'class' on your @Mod class.", objectClass.getSimpleName())
-                return obj
-            } catch (ex: Exception) {
-                throw KotlinAdapterException(ex)
-            }
+        logger.debug("Constructing new instance of {}", objectClass.simpleName)
+
+        val instanceField = findInstanceFieldOrThrow(objectClass)
+        val modObject = findModObjectOrThrow(instanceField)
+
+        return modObject
+    }
+
+    override fun supportsStatics() = false
+    override fun setInternalProxies(mod: ModContainer?, side: Side?, loader: ClassLoader?) = Unit
+
+    private fun findInstanceFieldOrThrow(targetClass: Class<*>): Field {
+        val instanceField: Field = try {
+            targetClass.getField("INSTANCE")
+        } catch (exception: NoSuchFieldException) {
+            throw noInstanceFieldException(exception)
+        } catch (exception: SecurityException) {
+            throw instanceSecurityException(exception)
         }
+
+        return instanceField
     }
 
-    override fun setInternalProxies(mod: ModContainer?, side: Side?, loader: ClassLoader?) {
-        // Nothing to do; FML's got this covered for Kotlin.
+    private fun findModObjectOrThrow(instanceField: Field): Any {
+        val modObject = try {
+            instanceField.get(null)
+        } catch (exception: IllegalArgumentException) {
+            throw unexpectedInitialiserSignatureException(exception)
+        } catch (exception: IllegalAccessException) {
+            throw wrongVisibilityOnInitialiserException(exception)
+        }
+
+        return modObject
     }
 
-    private class KotlinAdapterException(ex:Exception): RuntimeException("Kotlin adapter error - do not report to Forge!", ex)
+    private fun noInstanceFieldException(exception: Exception) = KotlinAdapterException("Couldn't find INSTANCE singleton on Kotlin @Mod container", exception)
+    private fun instanceSecurityException(exception: Exception) = KotlinAdapterException("Security violation accessing INSTANCE singleton on Kotlin @Mod container", exception)
+    private fun modObjectFailedToInitialiseException(exception: Exception) = KotlinAdapterException("Failed to initialise Kotlin @Mod object", exception)
+    private fun unexpectedInitialiserSignatureException(exception: Exception) = KotlinAdapterException("Kotlin @Mod object has an unexpected initialiser signature, somehow?", exception)
+    private fun wrongVisibilityOnInitialiserException(exception: Exception) = KotlinAdapterException("Initialiser on Kotlin @Mod object isn't `public`", exception)
 
+    private class KotlinAdapterException(message: String, exception: Exception): RuntimeException("Kotlin adapter error - do not report to Forge! " + message, exception)
 }
