@@ -10,13 +10,15 @@ The basic workflow for using the Adapter in your project is;
 3. Hack away
 
 ### Buildscript Preparation
+These instructions are for FG 2.1+.
+
 We require the Kotlin and Forge plugins to be enabled in `build.gradle`:
 ```
 buildscript {
 	[...]
 	dependencies {
 		[...]
-		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.0-rc-1036"
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.1"
 	}
 	[...]
 }
@@ -52,12 +54,12 @@ configurations {
 ```
 
 Then on the lines where you would normally define `compile` in the main dependencies block for Kotlin, replace `compile`
-with `shade` - below is an example dependency block (for Kotlin 1.0.0-rc-1036.) If you need the kotlin-reflect library,
+with `shade` - below is an example dependency block (for Kotlin 1.0.1.) If you need the kotlin-reflect library,
 add that in the same way (but be aware this'll add >1MB to your jar size!)
 ```
 dependencies {
-	shade 'org.jetbrains.kotlin:kotlin-stdlib:1.0.0-rc-1036'
-	shade 'io.drakon.forge:kotlin-adapter:1.0.0-rc-1036+1.8.9'
+	shade 'org.jetbrains.kotlin:kotlin-stdlib:1.0.1'
+	shade 'io.drakon.forge:kotlin-adapter:1.0.1+1.8.9'
 }
 ```
 
@@ -81,9 +83,9 @@ that may be on the classpath:
 reobf {
     jar {
 	    // Kotlin+Adapter shading
-	    extra "PK: kotlin your/package/here/repack/kotlin"
-	    extra "PK: org/jetbrains/annotations your/package/here/repack/annotations"
-	    extra "PK: io/drakon/forge/kotlin your/package/here/repack/adapter"
+	    extraLines += [ "PK: kotlin your/package/here/repack/kotlin" ]
+	    extraLines += [ "PK: org/jetbrains/annotations your/package/here/repack/annotations" ]
+	    extraLines += [ "PK: io/drakon/forge/kotlin your/package/here/repack/adapter" ]
 	}
 }
 ```
