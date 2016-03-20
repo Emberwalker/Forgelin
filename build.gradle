@@ -63,11 +63,34 @@ def verManifest = manifest {
 //================================================
 // Jar tasks
 
+// Disable Javadoc doclint on JVM 1.8
+if (JavaVersion.current().isJava8Compatible()) {
+  allprojects {
+      tasks.withType(Javadoc) {
+      options.addStringOption('Xdoclint:none', '-quiet')
+    }
+  }
+}
+
 jar {
   // Merge Jenkins and Git manifests to form final manifest in final release jar
   manifest {
     from droneManifest, verManifest
   }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+artifacts {
+  archives sourcesJar, javadocJar
 }
 
 
